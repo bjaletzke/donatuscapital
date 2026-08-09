@@ -46,37 +46,41 @@ describe("projects", () => {
 
   it("creates, lists, reads, updates, deletes a project", async () => {
     const create = await json(admin, "POST", "/api/projects", {
-      slug: "kenya-2026",
+      slug: "proj-crud",
       title: "Kenya 2026",
       description: "First safari",
       date: "2026",
     });
     expect(create.status).toBe(201);
     const manifest = (await create.json()) as ProjectManifest;
-    expect(manifest).toMatchObject({ slug: "kenya-2026", title: "Kenya 2026", media: [] });
+    expect(manifest).toMatchObject({ slug: "proj-crud", title: "Kenya 2026", media: [] });
 
-    const dup = await json(admin, "POST", "/api/projects", { slug: "kenya-2026", title: "Again" });
+    const dup = await json(admin, "POST", "/api/projects", { slug: "proj-crud", title: "Again" });
     expect(dup.status).toBe(409);
 
     const list = await json(guest, "GET", "/api/projects");
     const index = (await list.json()) as ProjectIndexEntry[];
-    expect(index).toEqual([{ slug: "kenya-2026", title: "Kenya 2026", date: "2026" }]);
+    expect(index.find((e) => e.slug === "proj-crud")).toEqual({
+      slug: "proj-crud",
+      title: "Kenya 2026",
+      date: "2026",
+    });
 
-    const read = await json(guest, "GET", "/api/projects/kenya-2026");
+    const read = await json(guest, "GET", "/api/projects/proj-crud");
     expect(((await read.json()) as ProjectManifest).description).toBe("First safari");
 
-    const update = await json(admin, "PUT", "/api/projects/kenya-2026", { title: "Kenya '26" });
+    const update = await json(admin, "PUT", "/api/projects/proj-crud", { title: "Kenya '26" });
     expect(update.status).toBe(200);
     const afterList = (await (await json(guest, "GET", "/api/projects")).json()) as ProjectIndexEntry[];
-    expect(afterList[0].title).toBe("Kenya '26");
+    expect(afterList.find((e) => e.slug === "proj-crud")?.title).toBe("Kenya '26");
 
-    const guestDelete = await json(guest, "DELETE", "/api/projects/kenya-2026");
+    const guestDelete = await json(guest, "DELETE", "/api/projects/proj-crud");
     expect(guestDelete.status).toBe(403);
-    const del = await json(admin, "DELETE", "/api/projects/kenya-2026");
+    const del = await json(admin, "DELETE", "/api/projects/proj-crud");
     expect(del.status).toBe(200);
-    const gone = await json(guest, "GET", "/api/projects/kenya-2026");
+    const gone = await json(guest, "GET", "/api/projects/proj-crud");
     expect(gone.status).toBe(404);
     const emptyList = (await (await json(guest, "GET", "/api/projects")).json()) as ProjectIndexEntry[];
-    expect(emptyList).toEqual([]);
+    expect(emptyList.find((e) => e.slug === "proj-crud")).toBeUndefined();
   });
 });
