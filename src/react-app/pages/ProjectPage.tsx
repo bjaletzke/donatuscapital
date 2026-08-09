@@ -1,17 +1,19 @@
 import { useCallback, useEffect, useState } from "react";
 import { Link, useParams } from "react-router";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, Download } from "lucide-react";
 import InvestorHeader from "@/components/InvestorHeader";
 import MediaTile from "@/components/gallery/MediaTile";
 import Lightbox from "@/components/gallery/Lightbox";
+import DownloadDialog from "@/components/gallery/DownloadDialog";
 import { api } from "@/lib/api";
-import type { ProjectManifest } from "../../shared/types";
+import type { MediaItem, ProjectManifest } from "../../shared/types";
 
 export default function ProjectPage() {
   const { slug } = useParams<{ slug: string }>();
   const [manifest, setManifest] = useState<ProjectManifest | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [lightbox, setLightbox] = useState<number | null>(null);
+  const [downloadItem, setDownloadItem] = useState<MediaItem | null>(null);
 
   const reload = useCallback(() => {
     if (!slug) return;
@@ -61,6 +63,19 @@ export default function ProjectPage() {
                       ? () => setLightbox(photos.findIndex((p) => p.id === item.id))
                       : undefined
                   }
+                  overlay={
+                    <button
+                      type="button"
+                      aria-label="Download"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setDownloadItem(item);
+                      }}
+                      className="absolute right-2 top-2 bg-ink/70 p-2 text-cream opacity-0 transition-opacity hover:bg-ink group-hover:opacity-100 focus-visible:opacity-100"
+                    >
+                      <Download className="h-4 w-4" />
+                    </button>
+                  }
                 />
               ))}
             </div>
@@ -72,6 +87,26 @@ export default function ProjectPage() {
             index={lightbox}
             onClose={() => setLightbox(null)}
             onNavigate={setLightbox}
+            action={
+              <button
+                type="button"
+                aria-label="Download"
+                onClick={() => setDownloadItem(photos[lightbox])}
+                className="p-2 opacity-70 transition-opacity hover:opacity-100"
+              >
+                <Download className="h-5 w-5" />
+              </button>
+            }
+          />
+        )}
+        {downloadItem && slug && (
+          <DownloadDialog
+            slug={slug}
+            item={downloadItem}
+            open
+            onOpenChange={(open) => {
+              if (!open) setDownloadItem(null);
+            }}
           />
         )}
       </main>
