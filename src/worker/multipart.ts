@@ -2,7 +2,7 @@ import type { Hono } from "hono";
 import { requireSession, type AppEnv } from "./auth";
 import { getJSON, putJSON } from "./r2";
 import { manifestKey, syncIndex } from "./projects";
-import { extensionOf } from "./media";
+import { extensionOf, parseTakenAt, sanitizeKeywords } from "./media";
 import type { MediaItem, ProjectManifest } from "../shared/types";
 
 export function registerMultipartRoutes(app: Hono<AppEnv>) {
@@ -61,6 +61,8 @@ export function registerMultipartRoutes(app: Hono<AppEnv>) {
         type?: unknown;
         width?: unknown;
         height?: unknown;
+        takenAt?: unknown;
+        keywords?: unknown;
       }>();
       const key = typeof body.key === "string" ? body.key : "";
       const uploadId = typeof body.uploadId === "string" ? body.uploadId : "";
@@ -78,11 +80,15 @@ export function registerMultipartRoutes(app: Hono<AppEnv>) {
       const stored = await upload.complete(parts);
       const contentType = stored.httpMetadata?.contentType ?? "application/octet-stream";
 
+      const takenAt = parseTakenAt(body.takenAt);
+      const keywords = sanitizeKeywords(body.keywords);
       const item: MediaItem = {
         id: key.split("/")[1]?.split(".")[0] ?? crypto.randomUUID().slice(0, 8),
         type,
         key,
         filename,
+        ...(takenAt ? { takenAt } : {}),
+        ...(keywords.length ? { keywords } : {}),
         width: typeof body.width === "number" ? body.width : 0,
         height: typeof body.height === "number" ? body.height : 0,
         size: stored.size,

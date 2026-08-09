@@ -79,6 +79,38 @@ describe("media", () => {
     expect(manifest.media.map((m) => m.id)).toContain(item.id);
   });
 
+  it("stores takenAt and keywords from upload params", async () => {
+    const { slug } = await setupProjectWithPhoto();
+    const res = await SELF.fetch(
+      `https://example.com/api/projects/${slug}/media?filename=b.png&type=photo&width=10&height=10&takenAt=2026-03-04T08:30:00Z&keywords=${encodeURIComponent("Lions, Masai Mara, lions , ")}`,
+      { method: "POST", headers: { cookie: admin, "content-type": "image/png" }, body: BYTES }
+    );
+    expect(res.status).toBe(201);
+    const item = (await res.json()) as MediaItem;
+    expect(item.takenAt).toBe("2026-03-04T08:30:00.000Z");
+    expect(item.keywords).toEqual(["Lions", "Masai Mara"]);
+  });
+
+  it("merges takenAt and keywords via project PUT", async () => {
+    const { slug, item } = await setupProjectWithPhoto();
+    const put = await SELF.fetch(`https://example.com/api/projects/${slug}`, {
+      method: "PUT",
+      headers: { "content-type": "application/json", cookie: admin },
+      body: JSON.stringify({
+        media: [
+          { id: item.id, caption: "cap", takenAt: "2026-03-05", keywords: ["dawn", "camp"] },
+        ],
+      }),
+    });
+    expect(put.status).toBe(200);
+    const manifest = (await put.json()) as ProjectManifest;
+    expect(manifest.media[0]).toMatchObject({
+      caption: "cap",
+      takenAt: "2026-03-05T00:00:00.000Z",
+      keywords: ["dawn", "camp"],
+    });
+  });
+
   it("rejects unknown extensions", async () => {
     const { slug } = await setupProjectWithPhoto();
     const res = await SELF.fetch(

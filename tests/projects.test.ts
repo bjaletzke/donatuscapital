@@ -64,6 +64,7 @@ describe("projects", () => {
       slug: "proj-crud",
       title: "Kenya 2026",
       date: "2026",
+      description: "First safari",
     });
 
     const read = await json(guest, "GET", "/api/projects/proj-crud");

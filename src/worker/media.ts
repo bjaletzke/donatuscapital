@@ -13,6 +13,29 @@ export function extensionOf(filename: string): string | null {
   return EXT_WHITELIST.has(ext) ? ext : null;
 }
 
+/** Trim, drop empties/overlongs, dedupe case-insensitively, cap at 30. */
+export function sanitizeKeywords(input: unknown): string[] {
+  if (!Array.isArray(input)) return [];
+  const seen = new Set<string>();
+  const out: string[] = [];
+  for (const raw of input) {
+    if (typeof raw !== "string") continue;
+    const kw = raw.trim().slice(0, 40);
+    const lower = kw.toLowerCase();
+    if (!kw || seen.has(lower)) continue;
+    seen.add(lower);
+    out.push(kw);
+    if (out.length >= 30) break;
+  }
+  return out;
+}
+
+export function parseTakenAt(input: unknown): string | undefined {
+  if (typeof input !== "string" || !input) return undefined;
+  const t = Date.parse(input);
+  return Number.isNaN(t) ? undefined : new Date(t).toISOString();
+}
+
 /** Session cookie OR signed media token (used by the image-transformation origin fetch). */
 async function authorizeMediaRequest(c: Context<AppEnv>, key: string): Promise<boolean> {
   const session = await verifySession(getCookie(c, COOKIE), c.env.SESSION_SECRET);
@@ -70,11 +93,15 @@ export function registerMediaRoutes(app: Hono<AppEnv>) {
       httpMetadata: { contentType },
     });
 
+    const takenAt = parseTakenAt(c.req.query("takenAt"));
+    const keywords = sanitizeKeywords((c.req.query("keywords") ?? "").split(","));
     const item: MediaItem = {
       id,
       type,
       key,
       filename,
+      ...(takenAt ? { takenAt } : {}),
+      ...(keywords.length ? { keywords } : {}),
       width: Number.isFinite(width) ? width : 0,
       height: Number.isFinite(height) ? height : 0,
       size: stored.size,

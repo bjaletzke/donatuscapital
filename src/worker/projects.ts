@@ -1,5 +1,6 @@
 import type { Hono } from "hono";
 import { requireSession, type AppEnv } from "./auth";
+import { parseTakenAt, sanitizeKeywords } from "./media";
 import { getJSON, putJSON } from "./r2";
 import type { MediaItem, ProjectIndexEntry, ProjectManifest } from "../shared/types";
 
@@ -24,6 +25,7 @@ export async function syncIndex(bucket: R2Bucket, manifest: ProjectManifest): Pr
     slug: manifest.slug,
     title: manifest.title,
     date: manifest.date,
+    ...(manifest.description ? { description: manifest.description } : {}),
     ...(coverKey ? { cover: coverKey } : {}),
   };
   const i = index.findIndex((e) => e.slug === manifest.slug);
@@ -106,14 +108,30 @@ export function registerProjectRoutes(app: Hono<AppEnv>) {
       // from the client, drop unknown ids.
       const allowed = new Map(stored.media.map((m) => [m.id, m]));
       const next: MediaItem[] = [];
-      for (const entry of body.media as Array<{ id?: unknown; caption?: unknown }>) {
+      for (const entry of body.media as Array<{
+        id?: unknown;
+        caption?: unknown;
+        takenAt?: unknown;
+        keywords?: unknown;
+      }>) {
         if (typeof entry?.id !== "string") continue;
         const existing = allowed.get(entry.id);
         if (!existing) continue;
-        next.push({
+        const merged: MediaItem = {
           ...existing,
           caption: typeof entry.caption === "string" ? entry.caption : existing.caption,
-        });
+        };
+        if (entry.takenAt === null) delete merged.takenAt;
+        else {
+          const takenAt = parseTakenAt(entry.takenAt);
+          if (takenAt) merged.takenAt = takenAt;
+        }
+        if (Array.isArray(entry.keywords)) {
+          const keywords = sanitizeKeywords(entry.keywords);
+          if (keywords.length) merged.keywords = keywords;
+          else delete merged.keywords;
+        }
+        next.push(merged);
       }
       stored.media = next;
     }
