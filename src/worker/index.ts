@@ -3,6 +3,7 @@ import { registerAuthRoutes, type AppEnv } from "./auth";
 import { registerProjectRoutes } from "./projects";
 import { registerMediaRoutes } from "./media";
 import { registerVariantRoutes } from "./variants";
+import { registerMultipartRoutes } from "./multipart";
 
 const app = new Hono<AppEnv>();
 
@@ -12,5 +13,6 @@ registerAuthRoutes(app);
 registerProjectRoutes(app);
 registerVariantRoutes(app);
 registerMediaRoutes(app);
+registerMultipartRoutes(app);
 
 export default app;
