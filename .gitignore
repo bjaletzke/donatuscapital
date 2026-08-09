@@ -1,0 +1,26 @@
+# Dependencies
+node_modules/
+
+# Build output
+dist/
+
+# Local secrets — NEVER commit
+.dev.vars
+.dev.vars.*
+.env
+.env.*
+
+# Wrangler state
+.wrangler/
+
+# Logs
+*.log
+npm-debug.log*
+
+# Editor / OS
+.DS_Store
+.vscode/
+.idea/
+
+# Test coverage
+coverage/
