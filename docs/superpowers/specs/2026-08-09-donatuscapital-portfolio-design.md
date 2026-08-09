@@ -50,7 +50,7 @@ The app supersedes the existing `donatuscapital-site` repo (Vite + React + Hono 
 - `GET /api/auth/me` — returns `{ role }` or 401.
 - All `/api/*` data/media routes require a valid session; admin routes require `role=admin`.
 - Same generic error for wrong phrase regardless of tier (no role leakage).
-- Per-IP rate limiting on login via the Workers rate-limiting binding; 429 after repeated failures.
+- Per-IP rate limiting on login (in-Worker sliding window; a Cloudflare WAF rate-limiting rule can be layered on later); 429 after repeated failures.
 
 ## Media pipeline
 
