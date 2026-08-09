@@ -13,5 +13,9 @@
   },
   "r2_buckets": [
     { "binding": "BUCKET", "bucket_name": "donatus-portfolio" }
+  ],
+  "routes": [
+    { "pattern": "donatuscapital.com", "custom_domain": true },
+    { "pattern": "www.donatuscapital.com", "custom_domain": true }
   ]
 }
