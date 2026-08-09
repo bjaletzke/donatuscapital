@@ -1,10 +1,13 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router";
 import InvestorHeader from "@/components/InvestorHeader";
+import NewProjectDialog from "@/components/admin/NewProjectDialog";
 import { api, variantUrl } from "@/lib/api";
+import { useSession } from "@/lib/session";
 import type { ProjectIndexEntry } from "../../shared/types";
 
 export default function Projects() {
+  const { role } = useSession();
   const [projects, setProjects] = useState<ProjectIndexEntry[] | null>(null);
   const [error, setError] = useState<string | null>(null);
 
@@ -18,7 +21,10 @@ export default function Projects() {
     <div className="min-h-screen bg-cream text-ink">
       <InvestorHeader />
       <main className="mx-auto max-w-7xl px-6 py-12">
-        <h1 className="mb-10 text-2xl font-light tracking-wide">Projects</h1>
+        <div className="mb-10 flex items-center justify-between">
+          <h1 className="text-2xl font-light tracking-wide">Projects</h1>
+          {role === "admin" && <NewProjectDialog />}
+        </div>
         {error && <p className="text-sm opacity-70">{error}</p>}
         {projects && projects.length === 0 && (
           <p className="text-sm font-light opacity-60">No projects yet.</p>
