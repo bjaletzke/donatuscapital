@@ -2,7 +2,7 @@ import type { Context, Hono } from "hono";
 import { getCookie } from "hono/cookie";
 import { COOKIE, requireSession, verifyMediaToken, verifySession, type AppEnv } from "./auth";
 import { getJSON, putJSON } from "./r2";
-import { manifestKey } from "./projects";
+import { manifestKey, syncIndex } from "./projects";
 import type { MediaItem, ProjectManifest } from "../shared/types";
 
 const EXT_WHITELIST = new Set(["jpg", "jpeg", "png", "webp", "avif", "heic", "mp4", "mov", "webm"]);
@@ -82,6 +82,7 @@ export function registerMediaRoutes(app: Hono<AppEnv>) {
     };
     manifest.media.push(item);
     await putJSON(c.env.BUCKET, manifestKey(slug), manifest);
+    await syncIndex(c.env.BUCKET, manifest);
     return c.json(item, 201);
   });
 
@@ -102,6 +103,7 @@ export function registerMediaRoutes(app: Hono<AppEnv>) {
     manifest.media = manifest.media.filter((m) => m.id !== id);
     if (manifest.cover === id) manifest.cover = undefined;
     await putJSON(c.env.BUCKET, manifestKey(slug), manifest);
+    await syncIndex(c.env.BUCKET, manifest);
     return c.json({ ok: true });
   });
 }

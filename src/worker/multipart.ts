@@ -1,7 +1,7 @@
 import type { Hono } from "hono";
 import { requireSession, type AppEnv } from "./auth";
 import { getJSON, putJSON } from "./r2";
-import { manifestKey } from "./projects";
+import { manifestKey, syncIndex } from "./projects";
 import { extensionOf } from "./media";
 import type { MediaItem, ProjectManifest } from "../shared/types";
 
@@ -90,6 +90,7 @@ export function registerMultipartRoutes(app: Hono<AppEnv>) {
       };
       manifest.media.push(item);
       await putJSON(c.env.BUCKET, manifestKey(slug), manifest);
+      await syncIndex(c.env.BUCKET, manifest);
       return c.json(item, 201);
     }
   );

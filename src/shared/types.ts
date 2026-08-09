@@ -34,5 +34,6 @@ export interface ProjectIndexEntry {
   slug: string;
   title: string;
   date: string;
+  /** R2 key of the cover image (unlike ProjectManifest.cover, which is a media id) */
   cover?: string;
 }

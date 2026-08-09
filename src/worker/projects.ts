@@ -13,13 +13,18 @@ export async function readIndex(bucket: R2Bucket): Promise<ProjectIndexEntry[]> 
   return (await getJSON<ProjectIndexEntry[]>(bucket, INDEX_KEY)) ?? [];
 }
 
-async function syncIndex(bucket: R2Bucket, manifest: ProjectManifest): Promise<void> {
+export async function syncIndex(bucket: R2Bucket, manifest: ProjectManifest): Promise<void> {
   const index = await readIndex(bucket);
+  // The index stores the cover's R2 key (not its id) so grids can render
+  // covers without loading each manifest. Fall back to the first photo.
+  const coverKey =
+    manifest.media.find((m) => m.id === manifest.cover)?.key ??
+    manifest.media.find((m) => m.type === "photo")?.key;
   const entry: ProjectIndexEntry = {
     slug: manifest.slug,
     title: manifest.title,
     date: manifest.date,
-    ...(manifest.cover ? { cover: manifest.cover } : {}),
+    ...(coverKey ? { cover: coverKey } : {}),
   };
   const i = index.findIndex((e) => e.slug === manifest.slug);
   if (i === -1) index.push(entry);
