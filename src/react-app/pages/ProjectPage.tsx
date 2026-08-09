@@ -1,14 +1,16 @@
 import { useCallback, useEffect, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router";
-import { ArrowDown, ArrowLeft, ArrowUp, Download, ImageIcon, Pencil, Trash2 } from "lucide-react";
+import { ArrowLeft, Download, Pencil } from "lucide-react";
 import { toast } from "sonner";
 import InvestorHeader from "@/components/InvestorHeader";
-import MediaTile from "@/components/gallery/MediaTile";
+import GalleryView from "@/components/gallery/GalleryView";
 import Lightbox from "@/components/gallery/Lightbox";
 import DownloadDialog from "@/components/gallery/DownloadDialog";
 import UploadZone from "@/components/admin/UploadZone";
+import EditList, { type Draft } from "@/components/admin/EditList";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import {
   Dialog,
   DialogContent,
@@ -17,18 +19,9 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { api, variantUrl } from "@/lib/api";
+import { api } from "@/lib/api";
 import { useSession } from "@/lib/session";
-import { cn } from "@/lib/utils";
 import type { MediaItem, ProjectManifest } from "../../shared/types";
-
-interface Draft {
-  title: string;
-  description: string;
-  date: string;
-  cover?: string;
-  media: MediaItem[];
-}
 
 export default function ProjectPage() {
   const { slug } = useParams<{ slug: string }>();
@@ -36,7 +29,7 @@ export default function ProjectPage() {
   const navigate = useNavigate();
   const [manifest, setManifest] = useState<ProjectManifest | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [lightbox, setLightbox] = useState<number | null>(null);
+  const [lightbox, setLightbox] = useState<{ photos: MediaItem[]; index: number } | null>(null);
   const [downloadItem, setDownloadItem] = useState<MediaItem | null>(null);
   const [draft, setDraft] = useState<Draft | null>(null);
   const [saving, setSaving] = useState(false);
@@ -53,7 +46,6 @@ export default function ProjectPage() {
   useEffect(reload, [reload]);
 
   const editing = draft !== null;
-  const photos = manifest?.media.filter((m) => m.type === "photo") ?? [];
 
   const startEdit = () => {
     if (!manifest) return;
@@ -62,7 +54,7 @@ export default function ProjectPage() {
       description: manifest.description,
       date: manifest.date,
       cover: manifest.cover,
-      media: [...manifest.media],
+      media: manifest.media.map((m) => ({ ...m })),
     });
   };
 
@@ -77,7 +69,12 @@ export default function ProjectPage() {
           description: draft.description,
           date: draft.date,
           cover: draft.cover ?? null,
-          media: draft.media.map((m) => ({ id: m.id, caption: m.caption ?? "" })),
+          media: draft.media.map((m) => ({
+            id: m.id,
+            caption: m.caption ?? "",
+            takenAt: m.takenAt ?? null,
+            keywords: m.keywords ?? [],
+          })),
         }),
       });
       setManifest(updated);
@@ -90,33 +87,17 @@ export default function ProjectPage() {
     }
   };
 
-  const move = (index: number, delta: -1 | 1) => {
-    setDraft((d) => {
-      if (!d) return d;
-      const next = [...d.media];
-      const j = index + delta;
-      if (j < 0 || j >= next.length) return d;
-      [next[index], next[j]] = [next[j], next[index]];
-      return { ...d, media: next };
-    });
-  };
-
   const deleteItem = async (item: MediaItem) => {
     if (!slug) return;
     try {
       await api(`/api/projects/${slug}/media/${item.id}`, { method: "DELETE" });
-      setDraft((d) =>
-        d
-          ? {
-              ...d,
-              media: d.media.filter((m) => m.id !== item.id),
-              cover: d.cover === item.id ? undefined : d.cover,
-            }
-          : d
-      );
-      setManifest((m) =>
-        m ? { ...m, media: m.media.filter((x) => x.id !== item.id) } : m
-      );
+      const strip = <T extends { media: MediaItem[]; cover?: string }>(x: T): T => ({
+        ...x,
+        media: x.media.filter((m) => m.id !== item.id),
+        cover: x.cover === item.id ? undefined : x.cover,
+      });
+      setDraft((d) => (d ? strip(d) : d));
+      setManifest((m) => (m ? strip(m) : m));
       toast.success("Deleted");
     } catch {
       toast.error("Could not delete");
@@ -140,7 +121,7 @@ export default function ProjectPage() {
         <div className="mb-8 flex items-center justify-between">
           <Link
             to="/investor/projects"
-            className="inline-flex items-center gap-2 text-xs uppercase tracking-[0.15em] opacity-60 hover:opacity-90"
+            className="inline-flex items-center gap-2 font-mono text-xs uppercase tracking-[0.15em] opacity-60 hover:opacity-90"
           >
             <ArrowLeft className="h-3.5 w-3.5" /> All projects
           </Link>
@@ -162,11 +143,12 @@ export default function ProjectPage() {
                     className="text-xl"
                     aria-label="Title"
                   />
-                  <Input
+                  <Textarea
                     value={draft.description}
                     onChange={(e) => setDraft({ ...draft, description: e.target.value })}
-                    placeholder="Description"
+                    placeholder="Description — shown under the title and on the project card"
                     aria-label="Description"
+                    rows={3}
                   />
                   <Input
                     value={draft.date}
@@ -179,8 +161,12 @@ export default function ProjectPage() {
               ) : (
                 <>
                   <div className="flex items-baseline gap-4">
-                    <h1 className="text-3xl font-light tracking-wide">{manifest.title}</h1>
-                    <span className="text-sm tracking-[0.15em] opacity-50">{manifest.date}</span>
+                    <h1 className="font-serif text-3xl font-light tracking-wide">
+                      {manifest.title}
+                    </h1>
+                    <span className="font-mono text-sm tracking-[0.15em] opacity-50">
+                      {manifest.date}
+                    </span>
                   </div>
                   {manifest.description && (
                     <p className="mt-4 font-light leading-relaxed opacity-80">
@@ -205,86 +191,30 @@ export default function ProjectPage() {
             )}
 
             {editing && draft ? (
-              <ul className="space-y-3">
-                {draft.media.map((item, i) => (
-                  <li key={item.id} className="flex items-center gap-4 border border-ink/10 bg-white/60 p-3">
-                    <img
-                      src={variantUrl(item.key, 200)}
-                      alt=""
-                      className="h-16 w-20 shrink-0 object-cover"
-                    />
-                    <Input
-                      value={item.caption ?? ""}
-                      placeholder="Caption"
-                      onChange={(e) =>
-                        setDraft((d) =>
-                          d
-                            ? {
-                                ...d,
-                                media: d.media.map((m) =>
-                                  m.id === item.id ? { ...m, caption: e.target.value } : m
-                                ),
-                              }
-                            : d
-                        )
-                      }
-                      className="flex-1"
-                    />
-                    <div className="flex shrink-0 items-center gap-1">
-                      <Button variant="ghost" size="icon" onClick={() => move(i, -1)} disabled={i === 0} aria-label="Move up">
-                        <ArrowUp className="h-4 w-4" />
-                      </Button>
-                      <Button variant="ghost" size="icon" onClick={() => move(i, 1)} disabled={i === draft.media.length - 1} aria-label="Move down">
-                        <ArrowDown className="h-4 w-4" />
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => setDraft({ ...draft, cover: item.id })}
-                        aria-label="Set as cover"
-                        className={cn(item.type !== "photo" && "invisible", draft.cover === item.id && "bg-ink text-cream hover:bg-ink hover:text-cream")}
-                      >
-                        <ImageIcon className="h-4 w-4" />
-                      </Button>
-                      <Button variant="ghost" size="icon" onClick={() => deleteItem(item)} aria-label="Delete" className="text-destructive">
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  </li>
-                ))}
-                <li className="pt-6">
-                  <Button variant="outline" size="sm" onClick={() => setConfirmDelete(true)} className="gap-2 border-destructive/40 text-destructive hover:bg-destructive/5">
-                    <Trash2 className="h-3.5 w-3.5" /> Delete project
-                  </Button>
-                </li>
-              </ul>
+              <EditList
+                draft={draft}
+                setDraft={setDraft}
+                onDeleteItem={deleteItem}
+                onDeleteProject={() => setConfirmDelete(true)}
+              />
             ) : (
-              <div className="columns-1 gap-4 sm:columns-2 lg:columns-3">
-                {manifest.media.map((item) => (
-                  <MediaTile
-                    key={item.id}
-                    item={item}
-                    onOpen={
-                      item.type === "photo"
-                        ? () => setLightbox(photos.findIndex((p) => p.id === item.id))
-                        : undefined
-                    }
-                    overlay={
-                      <button
-                        type="button"
-                        aria-label="Download"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setDownloadItem(item);
-                        }}
-                        className="absolute right-2 top-2 bg-ink/70 p-2 text-cream opacity-0 transition-opacity hover:bg-ink group-hover:opacity-100 focus-visible:opacity-100"
-                      >
-                        <Download className="h-4 w-4" />
-                      </button>
-                    }
-                  />
-                ))}
-              </div>
+              <GalleryView
+                media={manifest.media}
+                onOpenPhoto={(photos, index) => setLightbox({ photos, index })}
+                renderOverlay={(item) => (
+                  <button
+                    type="button"
+                    aria-label="Download"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setDownloadItem(item);
+                    }}
+                    className="absolute right-2 top-2 bg-ink/70 p-2 text-cream opacity-0 transition-opacity hover:bg-ink group-hover:opacity-100 focus-visible:opacity-100"
+                  >
+                    <Download className="h-4 w-4" />
+                  </button>
+                )}
+              />
             )}
           </>
         )}
@@ -302,17 +232,17 @@ export default function ProjectPage() {
           </div>
         )}
 
-        {lightbox !== null && manifest && (
+        {lightbox !== null && (
           <Lightbox
-            photos={photos}
-            index={lightbox}
+            photos={lightbox.photos}
+            index={lightbox.index}
             onClose={() => setLightbox(null)}
-            onNavigate={setLightbox}
+            onNavigate={(index) => setLightbox((l) => (l ? { ...l, index } : l))}
             action={
               <button
                 type="button"
                 aria-label="Download"
-                onClick={() => setDownloadItem(photos[lightbox])}
+                onClick={() => setDownloadItem(lightbox.photos[lightbox.index])}
                 className="p-2 opacity-70 transition-opacity hover:opacity-100"
               >
                 <Download className="h-5 w-5" />

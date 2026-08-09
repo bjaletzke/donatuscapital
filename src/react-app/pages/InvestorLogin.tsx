@@ -40,11 +40,11 @@ export default function InvestorLogin() {
   return (
     <div className="dark min-h-screen bg-ink text-cream flex items-center justify-center px-6">
       <div className="w-full max-w-sm">
-        <a href="/" className="block mb-10 text-center text-sm tracking-[0.2em] uppercase opacity-60 hover:opacity-90 transition-opacity">
+        <a href="/" className="block mb-10 text-center font-mono text-sm tracking-[0.2em] uppercase opacity-60 hover:opacity-90 transition-opacity">
           Donatus Capital
         </a>
         <div className="border border-cream/15 bg-cream/[0.03] p-8">
-          <h1 className="text-xl font-light tracking-wide mb-1">Investor Access</h1>
+          <h1 className="font-serif text-xl font-light tracking-wide mb-1">Investor Access</h1>
           <p className="text-sm opacity-60 mb-6 font-light">
             This area is reserved for authorized parties.
           </p>

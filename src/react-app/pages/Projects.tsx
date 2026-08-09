@@ -50,9 +50,14 @@ export default function Projects() {
                 )}
               </div>
               <div className="mt-3 flex items-baseline justify-between">
-                <h2 className="text-lg font-light tracking-wide">{p.title}</h2>
-                <span className="text-xs tracking-[0.15em] opacity-50">{p.date}</span>
+                <h2 className="font-serif text-lg font-light tracking-wide">{p.title}</h2>
+                <span className="font-mono text-xs tracking-[0.15em] opacity-50">{p.date}</span>
               </div>
+              {p.description && (
+                <p className="mt-1 line-clamp-2 text-sm font-light leading-relaxed opacity-60">
+                  {p.description}
+                </p>
+              )}
             </Link>
           ))}
         </div>

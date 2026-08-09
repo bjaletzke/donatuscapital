@@ -133,6 +133,12 @@ export function registerProjectRoutes(app: Hono<AppEnv>) {
         }
         next.push(merged);
       }
+      // Items the payload didn't mention are KEPT (in their existing order) —
+      // removal goes through DELETE, so a partial or empty array can't wipe media.
+      const mentioned = new Set(next.map((m) => m.id));
+      for (const m of stored.media) {
+        if (!mentioned.has(m.id)) next.push(m);
+      }
       stored.media = next;
     }
     if (stored.cover && !stored.media.some((m) => m.id === stored.cover)) {

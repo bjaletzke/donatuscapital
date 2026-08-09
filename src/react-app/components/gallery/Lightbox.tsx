@@ -71,9 +71,16 @@ export default function Lightbox({ photos, index, onClose, onNavigate, action }:
             alt={photo.caption ?? photo.filename}
             className="min-h-0 max-h-full max-w-full object-contain"
           />
-          {photo.caption && (
-            <figcaption className="mt-3 text-sm font-light tracking-wide opacity-70">
-              {photo.caption}
+          {(photo.caption || (photo.keywords?.length ?? 0) > 0) && (
+            <figcaption className="mt-3 flex flex-wrap items-center justify-center gap-x-3 gap-y-1">
+              {photo.caption && (
+                <span className="text-sm font-light tracking-wide opacity-70">{photo.caption}</span>
+              )}
+              {photo.keywords?.map((k) => (
+                <span key={k} className="font-mono text-[11px] uppercase tracking-wider opacity-40">
+                  {k}
+                </span>
+              ))}
             </figcaption>
           )}
         </figure>

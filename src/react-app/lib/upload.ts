@@ -1,3 +1,4 @@
+import exifr from "exifr";
 import type { MediaItem } from "../../shared/types";
 import { api } from "./api";
 
@@ -57,6 +58,29 @@ function xhrUpload(
   });
 }
 
+/** EXIF capture time + IPTC/XMP keywords, falling back to file mtime. */
+async function extractMeta(
+  file: File,
+  type: "photo" | "video"
+): Promise<{ takenAt: string; keywords: string[] }> {
+  const fallback = new Date(file.lastModified).toISOString();
+  if (type !== "photo") return { takenAt: fallback, keywords: [] };
+  try {
+    const data = await exifr.parse(file, { iptc: true, xmp: true });
+    const taken = data?.DateTimeOriginal ?? data?.CreateDate;
+    const raw = data?.Keywords ?? data?.subject;
+    const keywords = (Array.isArray(raw) ? raw : raw ? [raw] : [])
+      .map((k: unknown) => String(k).trim())
+      .filter(Boolean);
+    return {
+      takenAt: taken instanceof Date && !Number.isNaN(taken.getTime()) ? taken.toISOString() : fallback,
+      keywords,
+    };
+  } catch {
+    return { takenAt: fallback, keywords: [] };
+  }
+}
+
 export async function uploadFile(
   slug: string,
   file: File,
@@ -64,7 +88,10 @@ export async function uploadFile(
 ): Promise<MediaItem> {
   const type = file.type.startsWith("video/") ? "video" : "photo";
   const dims = type === "photo" ? await imageDimensions(file) : await videoDimensions(file);
-  const qs = `filename=${encodeURIComponent(file.name)}&type=${type}&width=${dims.width}&height=${dims.height}`;
+  const meta = await extractMeta(file, type);
+  const qs =
+    `filename=${encodeURIComponent(file.name)}&type=${type}&width=${dims.width}&height=${dims.height}` +
+    `&takenAt=${encodeURIComponent(meta.takenAt)}&keywords=${encodeURIComponent(meta.keywords.join(","))}`;
 
   if (file.size <= SINGLE_LIMIT) {
     return xhrUpload(`/api/projects/${slug}/media?${qs}`, file, onProgress);
@@ -96,6 +123,8 @@ export async function uploadFile(
       type,
       width: dims.width,
       height: dims.height,
+      takenAt: meta.takenAt,
+      keywords: meta.keywords,
     }),
   });
 }

@@ -111,6 +111,17 @@ describe("media", () => {
     });
   });
 
+  it("PUT with a partial or empty media array cannot drop items", async () => {
+    const { slug, item } = await setupProjectWithPhoto();
+    const put = await SELF.fetch(`https://example.com/api/projects/${slug}`, {
+      method: "PUT",
+      headers: { "content-type": "application/json", cookie: admin },
+      body: JSON.stringify({ media: [] }),
+    });
+    const manifest = (await put.json()) as ProjectManifest;
+    expect(manifest.media.map((m) => m.id)).toEqual([item.id]);
+  });
+
   it("rejects unknown extensions", async () => {
     const { slug } = await setupProjectWithPhoto();
     const res = await SELF.fetch(

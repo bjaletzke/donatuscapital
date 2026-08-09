@@ -16,13 +16,13 @@ export default function InvestorHeader() {
       <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
         <Link
           to="/investor/projects"
-          className="text-sm font-normal uppercase tracking-[0.2em] opacity-80 hover:opacity-100"
+          className="font-mono text-sm font-normal uppercase tracking-[0.2em] opacity-80 hover:opacity-100"
         >
           Donatus Capital
         </Link>
         <div className="flex items-center gap-3">
           {role === "admin" && (
-            <span className="border border-ink/20 px-2 py-0.5 text-[10px] uppercase tracking-[0.15em] opacity-60">
+            <span className="border border-ink/20 px-2 py-0.5 font-mono text-[10px] uppercase tracking-[0.15em] opacity-60">
               Admin
             </span>
           )}
