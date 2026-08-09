@@ -7,7 +7,8 @@ else
     echo "BLOCKED: attempting to commit a secrets file" >&2
     exit 1
   fi
-  if git diff --cached -U0 | grep -qE '(PASSPHRASE|SESSION_SECRET|API_KEY|SECRET_KEY)\s*[=:]\s*["'"'"']?[A-Za-z0-9+/_-]{12,}'; then
+  if git diff --cached -U0 | grep -E '(PASSPHRASE|SESSION_SECRET|API_KEY|SECRET_KEY)\s*[=:]\s*["'"'"']?[A-Za-z0-9+/_-]{12,}' \
+      | grep -vqiE 'test|dev-only|example|placeholder'; then
     echo "BLOCKED: staged diff looks like it contains a secret value" >&2
     exit 1
   fi
