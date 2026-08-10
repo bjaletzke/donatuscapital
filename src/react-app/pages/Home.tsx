@@ -108,18 +108,16 @@ export default function Home() {
         {/* Overlay */}
         <div className="absolute inset-0 bg-gradient-to-t from-[#181b19]/95 via-[#181b19]/70 to-[#181b19]/85 dark:from-[#181b19]/98 dark:via-[#181b19]/80 dark:to-[#181b19]/90"></div>
 
-        <div className="relative z-10 max-w-5xl mx-auto px-6 py-20 w-full">
-          <div className="flex flex-col items-center gap-6 text-[#F5F5F3] md:flex-row md:justify-center md:gap-24">
-            <h4 className="font-mono text-sm font-normal tracking-[0.2em] uppercase opacity-90">
-              The Journey
-            </h4>
-            <h4 className="font-mono text-sm font-normal tracking-[0.2em] uppercase opacity-90">
-              The Vision
-            </h4>
-            <h4 className="font-mono text-sm font-normal tracking-[0.2em] uppercase opacity-90">
-              The Discovery
-            </h4>
-          </div>
+        <div className="relative z-10 max-w-5xl mx-auto px-6 py-24 w-full text-center text-[#F5F5F3]">
+          <p className="font-serif text-2xl md:text-3xl font-light italic leading-relaxed opacity-90 mb-10">
+            For those who know where to look.
+          </p>
+          <Link
+            to="/investor"
+            className="inline-block border border-[#F5F5F3]/40 px-8 py-3 font-mono text-xs uppercase tracking-[0.3em] text-[#F5F5F3]/90 transition-colors hover:border-[#F5F5F3] hover:bg-[#F5F5F3]/10"
+          >
+            Investor Access
+          </Link>
         </div>
       </section>
 
@@ -129,14 +127,6 @@ export default function Home() {
           Donatus Capital | London
         </p>
         <p className="font-mono text-sm tracking-wider opacity-50">Don't contact us.</p>
-        <p className="mt-4">
-          <Link
-            to="/investor"
-            className="font-mono text-xs uppercase tracking-[0.2em] opacity-40 transition-opacity hover:opacity-80"
-          >
-            Investor Login
-          </Link>
-        </p>
       </footer>
     </div>
   );
