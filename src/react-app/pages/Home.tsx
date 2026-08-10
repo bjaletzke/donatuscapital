@@ -32,7 +32,7 @@ export default function Home() {
             <img
               src="/DC_clean.svg"
               alt="Donatus Capital"
-              className="w-full max-w-xl lg:max-w-2xl mx-auto mb-12 drop-shadow-2xl"
+              className="w-full max-w-md lg:max-w-lg mx-auto mb-12 brightness-0 invert opacity-95 drop-shadow-2xl"
             />
             <h1 className="font-serif text-3xl md:text-5xl lg:text-6xl font-light tracking-wide text-[#F5F5F3] mb-6 leading-tight">
               Strategic Investments.
@@ -82,66 +82,36 @@ export default function Home() {
               <h3 className="font-mono text-sm md:text-base font-normal tracking-[0.2em] uppercase mb-6 opacity-90">
                 Investment Philosophy
               </h3>
-              <p className="font-serif text-xl md:text-2xl lg:text-3xl font-light leading-relaxed">
-                Our approach combines rigorous fundamental analysis with a deep
-                understanding of market dynamics to identify compelling
-                investment opportunities across global markets.
+              <p className="font-serif text-2xl md:text-3xl lg:text-4xl font-light italic leading-relaxed">
+                Rigorous fundamental analysis, combined with deep market
+                insight.
               </p>
             </div>
           </div>
         </div>
       </section>
 
-      {/* Quote Box - Bridging the Two Sections */}
-      <div className="relative z-20 -mt-32 mb-16 px-6">
-        <div className="max-w-4xl mx-auto">
-          <div className="backdrop-blur-md bg-[#F5F5F3]/90 dark:bg-[#181b19]/90 border-2 border-[#181b19]/20 dark:border-[#F5F5F3]/20 rounded-none p-12 md:p-16 shadow-2xl">
-            <p className="font-serif text-2xl md:text-3xl lg:text-4xl font-light italic leading-relaxed text-center">
-              Rigorous fundamental analysis combined with deep market insights
-            </p>
-          </div>
-        </div>
-      </div>
-
-      {/* Discovery Section with Cave/Ocean Image */}
+      {/* Discovery Band with Cave/Ocean Image */}
       <section
-        className="relative min-h-screen flex items-center justify-center overflow-hidden bg-cover bg-center bg-no-repeat"
+        className="relative min-h-[45vh] flex items-center justify-center overflow-hidden bg-cover bg-center bg-no-repeat"
         style={{
           backgroundImage: "url('/venti-views-_JwjoWbXt7c-unsplash.jpg')",
         }}
       >
         {/* Overlay */}
-        <div className="absolute inset-0 bg-gradient-to-t from-[#181b19]/95 via-[#181b19]/60 to-[#181b19]/80 dark:from-[#181b19]/98 dark:via-[#181b19]/70 dark:to-[#181b19]/85"></div>
+        <div className="absolute inset-0 bg-gradient-to-t from-[#181b19]/95 via-[#181b19]/70 to-[#181b19]/85 dark:from-[#181b19]/98 dark:via-[#181b19]/80 dark:to-[#181b19]/90"></div>
 
-        <div className="relative z-10 max-w-7xl mx-auto px-6 py-24 w-full">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-12 md:gap-16 text-[#F5F5F3]">
-            <div className="text-center">
-              <h4 className="font-mono text-sm font-normal tracking-[0.2em] uppercase mb-4 opacity-90">
-                The Journey
-              </h4>
-              <p className="text-lg font-light leading-relaxed opacity-95">
-                Every investment begins with a journey of discovery, moving
-                forward with purpose and determination.
-              </p>
-            </div>
-            <div className="text-center">
-              <h4 className="font-mono text-sm font-normal tracking-[0.2em] uppercase mb-4 opacity-90">
-                The Vision
-              </h4>
-              <p className="text-lg font-light leading-relaxed opacity-95">
-                We seek elevated perspectives to identify opportunities others
-                may overlook in the vast landscape.
-              </p>
-            </div>
-            <div className="text-center">
-              <h4 className="font-mono text-sm font-normal tracking-[0.2em] uppercase mb-4 opacity-90">
-                The Discovery
-              </h4>
-              <p className="text-lg font-light leading-relaxed opacity-95">
-                Through careful analysis, we uncover pathways to sustainable
-                value and long-term growth.
-              </p>
-            </div>
+        <div className="relative z-10 max-w-5xl mx-auto px-6 py-20 w-full">
+          <div className="flex flex-col items-center gap-6 text-[#F5F5F3] md:flex-row md:justify-center md:gap-24">
+            <h4 className="font-mono text-sm font-normal tracking-[0.2em] uppercase opacity-90">
+              The Journey
+            </h4>
+            <h4 className="font-mono text-sm font-normal tracking-[0.2em] uppercase opacity-90">
+              The Vision
+            </h4>
+            <h4 className="font-mono text-sm font-normal tracking-[0.2em] uppercase opacity-90">
+              The Discovery
+            </h4>
           </div>
         </div>
       </section>
