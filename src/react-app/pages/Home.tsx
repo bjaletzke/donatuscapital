@@ -27,17 +27,24 @@ export default function Home() {
         <div className="absolute inset-0 bg-gradient-to-b from-[#181b19]/80 via-[#181b19]/70 to-[#181b19]/90 dark:from-[#181b19]/85 dark:via-[#181b19]/75 dark:to-[#181b19]/95"></div>
 
         {/* Hero Content */}
-        <div className="relative z-10 text-center px-6 max-w-5xl mx-auto w-full">
+        <div className="relative z-10 px-6 max-w-5xl mx-auto w-full">
           <div className="flex flex-col items-center justify-center">
-            <img
-              src="/DC_clean.svg"
-              alt="Donatus Capital"
-              className="w-full max-w-md lg:max-w-lg mx-auto mb-12 brightness-0 invert opacity-95 drop-shadow-2xl"
-            />
-            <h1 className="font-serif text-3xl md:text-5xl lg:text-6xl font-light tracking-wide text-[#F5F5F3] mb-6 leading-tight">
-              Strategic Investments.
-            </h1>
-            <p className="text-lg md:text-xl lg:text-2xl font-light text-[#F5F5F3]/90 tracking-wide max-w-3xl mx-auto">
+            <div className="flex flex-col items-center gap-8 md:flex-row md:items-center md:gap-12">
+              <img
+                src="/thinker.png"
+                alt=""
+                className="h-36 w-auto md:h-52 brightness-0 invert opacity-95 drop-shadow-2xl"
+              />
+              <h1 className="text-center text-[#F5F5F3] md:text-left">
+                <span className="block font-serif text-4xl md:text-6xl lg:text-7xl font-light leading-tight tracking-wide">
+                  Donatus Capital
+                </span>
+                <span className="mt-4 block font-mono text-xs md:text-base uppercase tracking-[0.42em] opacity-80">
+                  Strategic Investments
+                </span>
+              </h1>
+            </div>
+            <p className="mt-12 text-center text-lg md:text-xl lg:text-2xl font-light text-[#F5F5F3]/90 tracking-wide max-w-3xl mx-auto">
               Navigating global markets to deliver exceptional returns.
             </p>
           </div>
